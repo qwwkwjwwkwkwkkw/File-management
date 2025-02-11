@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="file-list">
+    <div class="d-flex justify-content-between mb-3">
+        <div>
+            {% if parent_dir is not none %}
+                <a href="{{ url_for('browse', subpath=parent_dir) }}" class="btn btn-secondary">Back</a>
+            {% endif %}
+        </div>
+        <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+            <div class="input-group">
+                <input type="file" class="form-control" name="file" required>
+                <input type="hidden" name="current_path" value="{{ current_path }}">
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </div>
+        </form>
+    </div>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Size</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dir in dirs %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('browse', subpath=dir[1]) }}">📁 {{ dir[0] }}</a>
+                    </td>
+                    <td>-</td>
+                    <td></td>
+                </tr>
+            {% endfor %}
+            
+            {% for file in files %}
+                <tr>
+                    <td>
+                        {% if file[0].lower().split('.')[-1] in ['jpg', 'jpeg', 'png', 'gif'] %}
+                            <a href="{{ url_for('browse', subpath=current_path + '/' + file[0]) }}" 
+                               class="image-preview">{{ file[0] }}</a>
+                        {% else %}
+                            <a href="{{ url_for('browse', subpath=current_path + '/' + file[0]) }}">{{ file[0] }}</a>
+                        {% endif %}
+                    </td>
+                    <td>{{ file[1] // 1024 }} KB</td>
+                    <td>
+                        {% if file[0].lower().split('.')[-1] in ['txt', 'md', 'py', 'html', 'css', 'js'] %}
+                            <a href="{{ url_for('edit', filename=current_path + '/' + file[0]) }}" 
+                               class="btn btn-sm btn-warning">Edit</a>
+                        {% endif %}
+                        <form method="POST" action="{{ url_for('delete') }}" class="d-inline">
+                            <input type="hidden" name="filename" value="{{ current_path + '/' + file[0] }}">
+                            <input type="hidden" name="current_path" value="{{ current_path }}">
+                            <button type="submit" class="btn btn-sm btn-danger delete-btn">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
